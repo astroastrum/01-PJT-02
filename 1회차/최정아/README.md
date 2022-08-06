@@ -5,15 +5,13 @@
 ##### 00.py
 
 ```python
-# 요청을 보냄 (request를 사용함)
+# 요청을 보냄 (requests를 사용함)
 import requests
-#비트코인 KRW 정의
-def get_btc_krw():
-    # order_currency에 BTC 넣음
-    order_currency = "BTC"
-    # pyament_currency에 KRW 넣음
-    payment_currency = "KRW"
-    #URL 만듬
+# 비트코인 KRW 정의
+def get_btc_krw(): 
+    order_currency = "BTC" # order_currency에 BTC 대입
+    payment_currency = "KRW"  # pyament_currency에 KRW 대입
+    # URL 만듬
     url = f"http://api.bithumb.com/public/ticker/{order_currency}_{payment_currency}"
     # URL에 get해서 가지고 오고 JSON을 파이썬 객체로 변함
     # 그러면 response 객체를 줌
@@ -36,26 +34,37 @@ if __name__ == "__main__":
 ##### 01.py
 
 ```python
-# 6113132e8f47d25f160c7567d23869a3
-# https://api.themoviedb.org/3/movie/76341?api_key=<<api_key>>
-# 요청을 보냄 (request를 사용함)
 import requests
+import os
+from detenv import load_dotenv # 환경변수 사용
+
+load_dotenv()
+api_key = os.getenv('api_key')
 
 
 def popular_count():
     pass 
-    #URL 만듬
+    #URL 저장
     BASE_URL = 'https://api.themoviedb.org/3' 
     # 상세경로에 popular movie 볼 수 있음
     path = '/movie/popular'
-    #params에 api_key라고 하는 곳에 값을 넣음
+    # params에 api_key라고 하는 곳에 값을 넣음
     params = {
-        'api_key': '6113132e8f47d25f160c7567d23869a3'
+        'api_key' : 'api_key',
+        'language' : 'ko-KR'
     }
-    # 응답결과는 requests.get(BASE_URL에 더하기 path
-    # 이것을 JSON으로 바꿔줌
+    # 응답결과는 requests.get(BASE_URL에 더하기 path)
+    # 이것을 파이썬 객체로 변환
     response = requests.get(BASE_URL+path, params=params).json()
-    print(response)
+    # print(response, type(response))
+
+    movie_list = response.get('results')
+
+    popular_count = 0
+    for movie in movie_list:
+        popular_count += 1
+
+    return popular_count
 
 # 아래의 코드는 수정하지 않습니다.
 if __name__ == '__main__':
@@ -74,6 +83,12 @@ if __name__ == '__main__':
 ```python
 import requests
 from pprint import pprint
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+api_key = os.getenv('api_key')
+
 
 
 def vote_average_movies():
@@ -81,21 +96,22 @@ def vote_average_movies():
     BASE_URL = 'https://api.themoviedb.org/3' 
     path = '/movie/popular'
     params = {
-        'api_key': '6113132e8f47d25f160c7567d23869a3'
+        'api_key': 'api_key',
+        'language' : 'ko-KR'
     }
 
-    res = requests.get(BASE_URL+path, params=params).json()
-    results = res['results']
-    eight_or_more = []
-    # 결과 출력 값이 리스트여서 빈 리스트 생성
-    for i in results:
-      if type(i) == dict:
-        points = i.get('vote_average')
-        if points >= 8:
-          # 평점 8점 이상 영화 선정
-            eight_or_more.append(i)
-    return eight_or_more
-    # 리스트 값 반환
+    response = requests.get(BASE_URL+path, params=params).json()
+    
+    movie_list = response.get('results') # movie_list에 response.get('results')을 저장
+    
+    vote_average_movies = []
+
+    for movie in movie_list:
+        if movie.get('vote_average') >= 8: # 평점 8점 이상 영화 get
+          vote_average_movies.append(movie)
+    
+    return vote_average_movies
+    
 
 
 # 아래의 코드는 수정하지 않습니다.
@@ -136,25 +152,33 @@ if __name__ == '__main__':
 ```python
 import requests
 from pprint import pprint
+import os
+from dotenv import load_dotenv
 
-BASE_URL = 'https://api.themoviedb.org/3' 
-path = '/movie/popular'
-params = {
-        'api_key': '6113132e8f47d25f160c7567d23869a3',
-        'language': 'ko-KR',
-        'page': 1
-    }
+load_dotenv()
+api_key = os.getenv('api_key')
 
-response = requests.get(BASE_URL+path, params=params)
-data = response.json()
-li = data.get('results')
 
 def ranking():
-    pass 
-    a = sorted(li, key=lambda x: x['vote_average'], reverse=True)
-    result = a[:5]
+    pass
 
-    return result 
+    BASE_URL = 'https://api.themoviedb.org/3' 
+    path = '/movie/popular'
+    params = {
+        'api_key': 'api_key',
+        'language': 'ko-KR',
+    }
+
+    response = requests.get(BASE_URL+path, params=params).json()
+    movie_list = response.get('results')
+    movie_list.sort(key=lambda x: x['vote_average'], reverse= True)
+
+ranking = [] # 빈 리스트 생성
+
+for i in range(5):
+    ranking.append(movie_list[i])
+
+return ranking
 
 
 # 아래의 코드는 수정하지 않습니다.
@@ -185,7 +209,6 @@ if __name__ == '__main__':
     ..생략..,
     }]
     """
-
 ```
 
 
@@ -196,41 +219,37 @@ if __name__ == '__main__':
 import requests
 from pprint import pprint
 
-
+# 추천 영화 (제목) 정의
 def recommendation(title):
     pass 
     # 여기에 코드를 작성합니다.  
-    BASE_URL = 'https://api.themoviedb.org/3' 
-    path = '/search/movie'
+    URL = 'https://api.themoviedb.org/3/search/movie' 
+    
     params = {
         'api_key': '6113132e8f47d25f160c7567d23869a3',
         'language': 'ko-KR',
         'query': title
     }
-    # 결과는 제목 입력해서 받음
-    res = requests.get(BASE_URL + path, params).json()
-    results = []
+    response = requests.get(URL, params=params).json()
+    a = response.get('results')
+    if len(a) == 0: # a의 길이가 0이면
+        return None # None 반환
+    b = a[0]['id']
 
-    if res['results']:
-        movie_id = res['results'][0]['id']
-        # 첫번째 영화
-        # id 값으로 영화 목록 
-        path2 = f'/movie/{movie_id}/recommendations'
-        params2 = {
+
+    URL2 = f'https://api.themoviedb.org/3/movie/{b}/recommendations'
+    params2 = {
         'api_key': '6113132e8f47d25f160c7567d23869a3',
         'language': 'ko-KR',
-        'query': movie_id
     }
+    c = requests.get(URL2, params = params2).json()
+    d = c.get('results') # results get
+    result = [] # 빈 리스트 생성
+    for i in d: # d를 순회
+        result.append(i['title'])
+    return result
+           
 
-        res2 = requests.get(BASE_URL + path2, params2).json()
-        for i in res2['results']:
-            # res2 반복해서 i값 할당
-            results.append(i['title'])
-            # 리스트에 추가
-        return results
-    else:
-        return None
-        # 아니면 None 
 # 아래의 코드는 수정하지 않습니다.
 if __name__ == '__main__':
     """
@@ -246,6 +265,7 @@ if __name__ == '__main__':
     pprint(recommendation('검색할 수 없는 영화'))
     # None
 
+
 ```
 
 
@@ -259,47 +279,43 @@ from pprint import pprint
 
 def credits(title):
     pass 
-    # 여기에 코드를 작성합니다.  
-    BASE_URL = 'https://api.themoviedb.org/3' 
-    path = '/search/movie'
+    URL = 'https://api.themoviedb.org/3/search/movie'
+    
     params = {
         'api_key': '6113132e8f47d25f160c7567d23869a3',
         'language': 'ko-KR',
         'query': title
     }
     
-    res = requests.get(BASE_URL + path, params).json()
- 
-    if res['results']:
-        movie_id = res['results'][0]['id']
-        path2 = f'/movie/{movie_id}/credits'
-        params2 = {
+    response = requests.get(URL, params=params).json()
+    a = response.get('results')
+    if len(a) == 0:
+        return None
+    b = a[0]['id']
+
+
+    URL1 = f'http://api.themoviedb.org/3/movie/{b}/credits'
+    params2 = {
         'api_key': '6113132e8f47d25f160c7567d23869a3',
         'language': 'ko-KR',
-        'query': movie_id
+
     }
-
-        res2 = requests.get(BASE_URL + path2, params2).json()
-        # 딕셔너리 타입이여서 cast와 crew 리스트 생성
-        cast = []
-        for i in res2["cast"]:
-            if i['cast_id'] < 10:
-                # cast_id 값이 10 미만이면 
-                cast.append(i['name'])
-                # cast에 추가
-        crew = []
-        for j in res2["crew"]:
-            if j['department'] == 'Directing' :
-                crew.append(j['name'])
+    c = requests.get(URL2, params = params2).json()
+    d = c.get('cast') # 출연진 get
+    t1 = []
+    for i in d:
+        if i['cast_id'] < 10: # 10 미만인 출연진이면
+            t1.append(i['name']) # t1에 추가
     
-        person = {}
-        person["cast"] = cast
-        person["crew"] = crew
-        # 딕셔너리에 추가
-        return person
+    e = c.get('crew') # 스태프 get
+    t2 = []
+    for i in e:
+        if i['department'] == 'Directing': # 부서가 Directing이면
+            t2.append(i['name']) # t2에 추가
 
-    else:
-        return None
+    result = {"cast" : t1, "crew" : t2}
+    return result
+       
 
 # 아래의 코드는 수정하지 않습니다.
 if __name__ == '__main__':
@@ -320,6 +336,6 @@ if __name__ == '__main__':
 
 ## :rocket: 후기
 
-* Python 기본 문법을 다시 문제에 응용하고 적용한 문법을 해설하는 시간을 통해 파이썬과 더욱 친해지게 되었습니다.
+* Python 기본 문법과 JSON을 다시 문제에 응용하고 적용한 문법을 해설하는 시간을 통해 파이썬과 더욱 친해지게 되었습니다.
 * `external library`를 활용해서 자유자재로 데이터를 수집할 수 있는 능력을 얻게 되었습니다.
 * Request와 Response의 본질을 이해하게 되었고 어떻게 사용하는지 알게 되었습니다. 개발자의 문서도 읽을 수 있는 역량이 생겼습니다.
