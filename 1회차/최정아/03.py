@@ -1,24 +1,32 @@
 import requests
 from pprint import pprint
+import os
+from dotenv import load_dotenv
 
-BASE_URL = 'https://api.themoviedb.org/3' 
-path = '/movie/popular'
-params = {
-        'api_key': '6113132e8f47d25f160c7567d23869a3',
-        'language': 'ko-KR',
-        'page': 1
-    }
+load_dotenv()
+api_key = os.getenv('api_key')
 
-response = requests.get(BASE_URL+path, params=params)
-data = response.json()
-li = data.get('results')
 
 def ranking():
-    pass 
-    a = sorted(li, key=lambda x: x['vote_average'], reverse=True)
-    result = a[:5]
+    pass
 
-    return result 
+    BASE_URL = 'https://api.themoviedb.org/3' 
+    path = '/movie/popular'
+    params = {
+        'api_key': 'api_key',
+        'language': 'ko-KR',
+    }
+
+    response = requests.get(BASE_URL+path, params=params).json()
+    movie_list = response.get('results')
+    movie_list.sort(key=lambda x: x['vote_average'], reverse= True)
+
+ranking = [] # 빈 리스트 생성
+
+for i in range(5):
+    ranking.append(movie_list[i])
+
+return ranking
 
 
 # 아래의 코드는 수정하지 않습니다.

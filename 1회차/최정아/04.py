@@ -1,41 +1,37 @@
 import requests
 from pprint import pprint
 
-
+# 추천 영화 (제목) 정의
 def recommendation(title):
     pass 
     # 여기에 코드를 작성합니다.  
-    BASE_URL = 'https://api.themoviedb.org/3' 
-    path = '/search/movie'
+    URL = 'https://api.themoviedb.org/3/search/movie' 
+    
     params = {
         'api_key': '6113132e8f47d25f160c7567d23869a3',
         'language': 'ko-KR',
         'query': title
     }
-    # 결과는 제목 입력해서 받음
-    res = requests.get(BASE_URL + path, params).json()
-    results = []
+    response = requests.get(URL, params=params).json()
+    a = response.get('results')
+    if len(a) == 0: # a의 길이가 0이면
+        return None # None 반환
+    b = a[0]['id']
 
-    if res['results']:
-        movie_id = res['results'][0]['id']
-        # 첫번째 영화
-        # id 값으로 영화 목록 
-        path2 = f'/movie/{movie_id}/recommendations'
-        params2 = {
+
+    URL2 = f'https://api.themoviedb.org/3/movie/{b}/recommendations'
+    params2 = {
         'api_key': '6113132e8f47d25f160c7567d23869a3',
         'language': 'ko-KR',
-        'query': movie_id
     }
+    c = requests.get(URL2, params = params2).json()
+    d = c.get('results') # results get
+    result = [] # 빈 리스트 생성
+    for i in d: # d를 순회
+        result.append(i['title'])
+    return result
+           
 
-        res2 = requests.get(BASE_URL + path2, params2).json()
-        for i in res2['results']:
-            # res2 반복해서 i값 할당
-            results.append(i['title'])
-            # 리스트에 추가
-        return results
-    else:
-        return None
-        # 아니면 None 
 # 아래의 코드는 수정하지 않습니다.
 if __name__ == '__main__':
     """
